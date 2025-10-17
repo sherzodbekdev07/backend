@@ -1,57 +1,49 @@
-import os
-import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
+import requests
+
 app = Flask(__name__)
 CORS(app)
 
-# 🔒 Muhit o'zgaruvchilaridan o'qiladi (Railway Variables)
 TOKEN = os.getenv("7867472873:AAGKwgCnMIvqtZEP8inHidPNa9LqtRuy_H4")
 CHAT_ID = os.getenv("7757348190")
-
-@app.route('/')
-def home():
-    return "✅ Geo-Location to Telegram Backend ishlayapti!"
 
 @app.route('/send-location', methods=['POST'])
 def send_location():
     try:
         data = request.get_json()
-        name = data.get('name')
-        surname = data.get('surname')
+        if not data:
+            return jsonify({"error": "JSON ma'lumot yo‘q"}), 400
+
+        first_name = data.get('firstName')
+        last_name = data.get('lastName')
         lat = data.get('lat')
         lon = data.get('lon')
 
-        if not all([name, surname, lat, lon]):
-            return jsonify({"ok": False, "error": "Yetarli ma'lumot kelmadi."}), 400
+        if not (first_name and last_name and lat and lon):
+            return jsonify({"error": "To‘liq ma'lumot yuborilmadi"}), 400
 
-        # 🧭 Telegramga yuboriladigan matn
-        message = (
-            f"📍 Yangi foydalanuvchi joylashuvi:\n\n"
-            f"👤 Ism: {name}\n"
-            f"👤 Familiya: {surname}\n"
-            f"🌐 Koordinatalar: {lat}, {lon}\n"
-            f"🗺 Xarita: https://maps.google.com/?q={lat},{lon}"
+        text = f"📍 {first_name} {last_name}\n🌐 Joylashuv: https://maps.google.com/?q={lat},{lon}"
+
+        res = requests.post(
+            f"https://api.telegram.org/bot{TOKEN}/sendMessage",
+            json={"chat_id": CHAT_ID, "text": text}
         )
 
-        # ✉️ Telegram API orqali yuborish
-        telegram_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-        response = requests.post(telegram_url, json={
-            "chat_id": CHAT_ID,
-            "text": message,
-            "parse_mode": "HTML"
-        })
+        if not res.ok:
+            print("Telegram javobi:", res.text)
+            return jsonify({"error": "Telegram API bilan muammo.", "ok": False}), 500
 
-        if response.status_code == 200:
-            return jsonify({"ok": True, "message": "Joylashuv yuborildi!"})
-        else:
-            return jsonify({"ok": False, "error": "Telegram API bilan muammo."}), 500
+        return jsonify({"ok": True})
 
     except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+        print("Server xatosi:", str(e))
+        return jsonify({"error": str(e)}), 500
 
+@app.route('/')
+def home():
+    return "Backend ishlayapti ✅"
 
 if __name__ == '__main__':
-    # Railway avtomatik PORT beradi
-    port = int(os.getenv("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000)
