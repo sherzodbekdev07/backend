@@ -4,7 +4,7 @@ import os
 import requests
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 TOKEN = os.getenv("7867472873:AAGKwgCnMIvqtZEP8inHidPNa9LqtRuy_H4")
 CHAT_ID = os.getenv("7757348190")
