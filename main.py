@@ -5,8 +5,8 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # 🔒 Muhit o'zgaruvchilaridan o'qiladi (Railway Variables)
-TOKEN = os.getenv("TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+TOKEN = os.getenv("7867472873:AAGKwgCnMIvqtZEP8inHidPNa9LqtRuy_H4")
+CHAT_ID = os.getenv("7757348190")
 
 @app.route('/')
 def home():
