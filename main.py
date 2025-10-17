@@ -2,8 +2,8 @@ import os
 import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-CORS(app)
 app = Flask(__name__)
+CORS(app)
 
 # 🔒 Muhit o'zgaruvchilaridan o'qiladi (Railway Variables)
 TOKEN = os.getenv("7867472873:AAGKwgCnMIvqtZEP8inHidPNa9LqtRuy_H4")
